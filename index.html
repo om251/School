@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Power of Induction: How AC Generators Work</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D0D;
+            color: #E0E0E0;
+            overflow-x: hidden;
+        }
+
+        /* --- Glassmorphism Card Style --- */
+        .glass-card {
+            background: rgba(30, 30, 40, 0.5);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.4s ease-in-out;
+        }
+        
+        /* --- Reveal Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+
+        @keyframes draw-line {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        /* --- Main Layout --- */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 450px 1fr;
+            grid-template-rows: 1fr 1fr;
+            align-items: center;
+            gap: 1rem 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 1rem;
+        }
+        
+        .diagram-wrapper {
+            grid-column: 2 / 3;
+            grid-row: 1 / 3;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Explanation Callouts with Hover Effect --- */
+        .callout {
+            opacity: 0;
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            cursor: pointer;
+        }
+        .callout-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-top 0.5s ease-out;
+        }
+        .callout:hover .callout-content {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 0.5rem;
+        }
+
+        .callout-1 { grid-column: 1 / 2; grid-row: 1 / 2; justify-self: end; align-self: center; animation: fadeIn 0.8s 0.5s forwards; }
+        .callout-2 { grid-column: 3 / 4; grid-row: 1 / 2; justify-self: start; align-self: center; animation: fadeIn 0.8s 0.8s forwards; }
+        .callout-3 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; align-self: center; animation: fadeIn 0.8s 1.1s forwards; }
+        .callout-4 { grid-column: 3 / 4; grid-row: 2 / 3; justify-self: start; align-self: center; animation: fadeIn 0.8s 1.4s forwards; }
+       
+        /* --- Pointer Lines (Hidden on mobile) --- */
+        .pointer {
+            position: absolute;
+            top: 50%;
+            width: 100px;
+            height: 100px;
+            overflow: visible;
+            z-index: -1;
+            transform: translateY(-50%);
+        }
+        .pointer-1 { right: -80px; }
+        .pointer-2 { left: -80px; }
+        .pointer-3 { right: -80px; }
+        .pointer-4 { left: -80px; }
+        
+        .pointer-line {
+            stroke: rgba(79, 141, 245, 0.6);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: draw-line 1s forwards;
+        }
+        .callout:nth-of-type(1) .pointer-line { animation-delay: 1.0s; }
+        .callout:nth-of-type(2) .pointer-line { animation-delay: 1.3s; }
+        .callout:nth-of-type(3) .pointer-line { animation-delay: 1.6s; }
+        .callout:nth-of-type(4) .pointer-line { animation-delay: 1.9s; }
+
+
+        /* --- Animated Generator Diagram --- */
+        .generator-container { position: relative; width: 100%; max-width: 400px; aspect-ratio: 1 / 1; margin: auto; }
+        .magnet { position: absolute; width: 25%; height: 70%; top: 15%; border-radius: 10px; }
+        .magnet-n { left: 0; background: linear-gradient(to right, #D32F2F, #E57373); box-shadow: 0 0 20px rgba(211, 47, 47, 0.5); }
+        .magnet-s { right: 0; background: linear-gradient(to left, #1976D2, #64B5F6); box-shadow: 0 0 20px rgba(25, 118, 210, 0.5); }
+        .magnet-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.8); text-shadow: 0 0 5px black; }
+
+        .coil-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: rotate-coil 8s linear infinite; transform-style: preserve-3d; }
+        .coil { position: absolute; top: 20%; left: 35%; width: 30%; height: 60%; border: 6px solid #FBC02D; border-radius: 8px; box-shadow: 0 0 20px rgba(251, 192, 45, 0.7); background: rgba(251, 192, 45, 0.1); }
+        @keyframes rotate-coil { from { transform: perspective(1000px) rotateY(0deg); } to { transform: perspective(1000px) rotateY(360deg); } }
+
+        /* --- Circuit & Electrons --- */
+        .circuit-wrapper { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; }
+        .bulb { width: 40px; height: 40px; background-color: #444; border-radius: 50%; border: 3px solid #666; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; animation: flicker 4s linear infinite; }
+        .bulb-base { width: 20px; height: 10px; background-color: #666; position: absolute; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2; }
+        .circuit-svg { position: absolute; top: 40px; left: 0; width: 100%; height: 100%; overflow: visible; }
+        .wire-path { fill: none; stroke: #757575; stroke-width: 3px; }
+
+        @keyframes flicker { 0%, 100% { background-color: #444; box-shadow: none; } 50% { background-color: #FFF59D; box-shadow: 0 0 25px 5px #FFFDE7; } }
+        
+        .electron {
+            fill: #82eefd;
+            animation: move-electron 4s linear infinite alternate;
+            /* offset-path is now defined inline in the SVG */
+        }
+        @keyframes move-electron {
+            from { motion-offset: 0%; }
+            to { motion-offset: 100%; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                justify-items: center;
+                gap: 1.5rem;
+            }
+            .diagram-wrapper { grid-column: 1 / 2; grid-row: 1 / 2; margin-bottom: 1rem; width: 300px; height: 300px; }
+            .callout { text-align: center; max-width: 90%; }
+            .callout-1, .callout-2, .callout-3, .callout-4 {
+                grid-column: 1 / 2; justify-self: center; align-self: auto;
+            }
+            .callout-1 { grid-row: 2/3; } .callout-2 { grid-row: 3/4; }
+            .callout-3 { grid-row: 4/5; } .callout-4 { grid-row: 5/6; }
+            .callout:hover .callout-content, .callout-content {
+                 max-height: 200px; opacity: 1; margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div class="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-purple-600/20 rounded-full filter blur-3xl opacity-50"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full filter blur-3xl opacity-50"></div>
+    </div>
+
+    <div class="relative min-h-screen flex flex-col items-center justify-start py-8 z-10">
+        <header class="text-center my-4 md:my-8 fade-in">
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400">
+                The AC Generator
+            </h1>
+            <p class="mt-2 text-lg md:text-xl text-gray-400">A Visual Guide to Electromagnetic Induction</p>
+        </header>
+
+        <div class="main-container w-full">
+            
+            <div class="callout callout-1 text-right">
+                <div class="glass-card p-4">
+                    <h3 class="font-bold text-white">1. The Magnets</h3>
+                    <div class="callout-content"><p class="text-sm text-gray-300">Powerful magnets create a constant magnetic field, an invisible area of influence running from North to South.</p></div>
+                </div>
+                <svg class="pointer pointer-1 hidden lg:block"><path d="M 100 0 C 20 0, 20 50, 0 50" class="pointer-line"/></svg>
+            </div>
+            
+            <div class="callout callout-2 text-left">
+                <div class="glass-card p-4">
+                    <h3 class="font-bold text-white">2. The Rotating Coil</h3>
+                    <div class="callout-content"><p class="text-sm text-gray-300">A loop of wire is spun by mechanical energy. As it turns, it 'cuts' through the magnetic field lines.</p></div>
+                </div>
+                <svg class="pointer pointer-2 hidden lg:block"><path d="M 0 0 C 80 0, 80 50, 100 50" class="pointer-line"/></svg>
+            </div>
+
+            <div class="diagram-wrapper fade-in" style="animation-delay: 0.2s;">
+                <div class="generator-container">
+                    <div class="magnet magnet-n"><span class="magnet-label">N</span></div>
+                    <div class="magnet magnet-s"><span class="magnet-label">S</span></div>
+                    <div class="coil-container"><div class="coil"></div></div>
+                    <div class="circuit-wrapper">
+                        <div class="bulb"></div>
+                        <div class="bulb-base"></div>
+                        <svg class="circuit-svg">
+                            <defs>
+                                <path id="wire-path-id" class="wire-path" d="M 50 10 L 30 10 C 15 10, 15 30, 30 30 L 170 30 C 185 30, 185 10, 170 10 L 150 10" />
+                            </defs>
+                            <use href="#wire-path-id" />
+                            <circle class="electron" r="4" style="animation-delay: 0s;"><animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wire-path-id"/></animateMotion></circle>
+                            <circle class="electron" r="4" style="animation-delay: -1s;"><animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wire-path-id"/></animateMotion></circle>
+                            <circle class="electron" r="4" style="animation-delay: -2s;"><animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wire-path-id"/></animateMotion></circle>
+                            <circle class="electron" r="4" style="animation-delay: -3s;"><animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wire-path-id"/></animateMotion></circle>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-3 text-right">
+                <div class="glass-card p-4">
+                    <h3 class="font-bold text-white">3. Induced Current</h3>
+                    <div class="callout-content"><p class="text-sm text-gray-300">This cutting action forces electrons in the wire to move, creating a current. This is electromagnetic induction.</p></div>
+                </div>
+                <svg class="pointer pointer-3 hidden lg:block"><path d="M 100 100 C 20 100, 20 50, 0 50" class="pointer-line"/></svg>
+            </div>
+            
+            <div class="callout callout-4 text-left">
+                <div class="glass-card p-4">
+                    <h3 class="font-bold text-white">4. Alternating Current</h3>
+                    <div class="callout-content"><p class="text-sm text-gray-300">The current reverses direction with each half-rotation, creating AC (alternating current) which lights the bulb.</p></div>
+                </div>
+                <svg class="pointer pointer-4 hidden lg:block"><path d="M 0 100 C 80 100, 80 50, 100 50" class="pointer-line"/></svg>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
